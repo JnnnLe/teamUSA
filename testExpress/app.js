@@ -7,13 +7,9 @@ app.listen(1337, function () {
   console.log('app listening on port 1337!')
 })
 
-
 var request=require('request');
 
-
-
-
-var findUVIndex = function (req, res) {
+var findUVIndex = function (req, response) {
   // Work here to send the api call to the weather ground
   // process the result of it and send back to the FE
 
@@ -29,6 +25,7 @@ var findUVIndex = function (req, res) {
     UVIndex = parsed_json['current_observation']['UV']
     // Figure out the risk and recommendation
     // switch case
+    console.log("the uvIndex is" + UVIndex)
     if (UVIndex <= 2.9) {
       risk = "Low"
       recommendation = "Wear sunglasses on bright days; use sunscreen if there is snow on the ground, which reflects UV radiation, or if you have particularly fair skin."
@@ -46,10 +43,9 @@ var findUVIndex = function (req, res) {
       recommendation = "Take all precautions: Wear SPF 30+ sunscreen, a long-sleeved shirt and trousers, sunglasses, and a very broad hat. Avoid the sun within three hours of solar noon."
     }
     //console.log(UVIndex, risk, recommendation)
-    next()
+    response.json({ uvIndex: UVIndex, risk: risk, recommendation: recommendation })
   });
-  console.log("body :" + JSON.stringify(values))
-  res.json({ uvIndex: values[0], risk: values[1], recommendation: values[2] })
+
 }
 
 
