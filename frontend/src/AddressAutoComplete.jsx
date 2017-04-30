@@ -40,7 +40,33 @@ export default class AddressAutocomplete extends Component {
         }
       }
       // input.value = selectedPlace.name // Code injection risk (check doc)
-      input.value = `${selectedSuggest.street_number}, ${selectedSuggest.route}, ${selectedSuggest.postal_code}`
+      var address = '';
+      if (selectedSuggest.street_number != undefined) {
+        address += selectedSuggest.street_number;
+        address += ', ';
+      }
+      if (selectedSuggest.route != undefined) {
+        address += selectedSuggest.route;
+        address += ', ';
+      }
+      if (selectedSuggest.locality != undefined) {
+        address += selectedSuggest.locality;
+        address += ', ';
+      }
+      if (selectedSuggest.administrative_area_level_1 != undefined) {
+        address += selectedSuggest.administrative_area_level_1;
+        address += ', ';
+      }
+      if (selectedSuggest.country != undefined) {
+        address += selectedSuggest.country;
+        address += ', ';
+      }
+      if (selectedSuggest.postal_code != undefined) {
+        address += selectedSuggest.postal_code;
+        address += ', ';
+      }
+      address = address.substring(0,address.length - 2);
+      input.value = address;
       this.props.onChange(selectedSuggest)
     })
   }
