@@ -71,7 +71,7 @@ export default class App extends React.Component {
   handleSubmit(state){
     var zipcode = document.getElementById('addressAutocompleteField').value.split(" ")[3];
     this.setState({zipcode:zipcode})
-    fetch('localhost:1337/findUVIndex', {
+    fetch('http://localhost:1337/findUVIndex', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -100,20 +100,20 @@ export default class App extends React.Component {
 
         <div className="row" style={styles.body}>
 
-          
+
             Date
-            <DatePicker 
+            <DatePicker
             hintText="What day are you going?"
             value={this.state.date}
             onChange={this.changeDate}/>
-          
 
-          
+
+
             Location <br/>
             <AddressAutoComplete/>
-          
 
-          
+
+
             <br/>Time of day<br/>
             <DropDownMenu value={this.state.hour1} onChange={this.handleHour1Change} style={styles.menu}>
               <MenuItem value={5} primaryText="5am" />
@@ -154,7 +154,7 @@ export default class App extends React.Component {
               <MenuItem value={20} primaryText="8pm" />
               <MenuItem value={21} primaryText="9pm" />
             </DropDownMenu>
-          
+
 
         </div>
 <RaisedButton label="Submimt" onTouchTap={() => this.handleSubmit(this.state)} />
