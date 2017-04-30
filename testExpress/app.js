@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 var app = express();
 var request = require('request');
 var path = require('path');
+var config = require('./config');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -32,13 +33,13 @@ app.use(function (req, res, next) {
 });
 
 var findRiskAndRecommendation = function(UVIndex) {
-  risk = null;
-  recommendation = null;
+  var risk = null;
+  var recommendation = null;
   if (UVIndex <= 2.9) {
-    risk = "Low";
+    risk = "Green";
     recommendation = "Wear sunglasses on bright days; use sunscreen if there is snow on the ground, which reflects UV radiation, or if you have particularly fair skin."
   } else if (UVIndex >= 3 && UVIndex <= 5.9)  {
-    risk  = "Moderate";
+    risk  = "Yellow";
     recommendation = "Take precautions, such as covering up, if you will be outside. Stay in shade near midday when the sun is strongest."
   } else if (UVIndex >= 6 && UVIndex <= 7.9) {
     risk = "Orange";
@@ -64,8 +65,7 @@ var findUVIndex = function (req, response) {
   */
   var UVIndex;
   var risk;
-  var recommendation;
-  var url = 'http://api.wunderground.com/api/e5d404218521ff0d/hourly10day/q/' + req.body.zipcode + '.json';
+  var url = 'http://api.wunderground.com/api/' + config.apiKey() + '/hourly10day/q/' + req.body.zipcode + '.json';
 
   // Process the epoch time sent to us and find the date
   var date = new Date(req.body.timestamp).getDate();
@@ -84,13 +84,12 @@ var findUVIndex = function (req, response) {
         values = findRiskAndRecommendation(hourly_forecast['uvi'])
         Fcttime.push(
           { 'hour':  hourly_forecast[i]['FCTTIME']['hour'],
-            'UVIndex' : hourly_forecast[i]['uvi'] ,
+            'UVIndex' : hourly_forecast[i]['uvi'],
             'risk': values[0],
             'temp': hourly_forecast[i]['temp']['english']
           })
       }
     }
-    //console.log(UVIndex, risk, recommendation)
     response.json({ response : Fcttime })
   });
 }
