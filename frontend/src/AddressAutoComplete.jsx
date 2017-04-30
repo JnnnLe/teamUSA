@@ -6,7 +6,9 @@ export default class AddressAutocomplete extends Component {
     value: PropTypes.string,
     floatingLabelText: PropTypes.string,
     hintText: PropTypes.string,
-    onChange: PropTypes.func
+    onChange: PropTypes.func,
+    updateAddress: PropTypes.func,
+    setZipcode: PropTypes.func
   }
 
   componentWillMount () {
@@ -34,6 +36,10 @@ export default class AddressAutocomplete extends Component {
       // and fill the corresponding field on the form.
       let selectedSuggest = {}
       for (let addressComponent of selectedPlace.address_components) {
+        if (addressComponent.types[0] == 'postal_code') {
+          this.props.setZipcode(addressComponent.short_name);
+          console.log(addressComponent.short_name);
+        }
         const addressType = addressComponent.types[0]
         if (componentForm[addressType]) {
           selectedSuggest[addressType] = addressComponent[componentForm[addressType]]
@@ -67,6 +73,7 @@ export default class AddressAutocomplete extends Component {
       }
       address = address.substring(0,address.length - 2);
       input.value = address;
+      this.props.updateAddress();
       this.props.onChange(selectedSuggest)
     })
   }

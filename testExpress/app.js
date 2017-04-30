@@ -52,6 +52,7 @@ var findRiskAndRecommendation = function(UVIndex) {
 
 
 var findUVIndex = function (req, response) {
+
   // Work here to send the api call to the weather ground
   // process the result of it and send back to the FE
 
@@ -87,7 +88,6 @@ var findUVIndex = function (req, response) {
     }
     response.json({ response : Fcttime })
   });
-
 }
 
 app.post('/findUVIndex', [findUVIndex]);
