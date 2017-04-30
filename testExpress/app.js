@@ -1,13 +1,11 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
+var request = require('request');
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json())
-app.listen(1337, function () {
-  console.log('app listening on port 1337!')
-})
 
-var request=require('request');
 
 var findUVIndex = function (req, response) {
   // Work here to send the api call to the weather ground
@@ -16,16 +14,16 @@ var findUVIndex = function (req, response) {
   /*
   * Step1: Get the request and process it
   */
-  var url = 'http://api.wunderground.com/api/e5d404218521ff0d/conditions/q/' + req.body.zipcode + '.json'
   var UVIndex;
   var risk;
   var recommendation;
-  var values = request.get(url, function(err,res,body){
-    var parsed_json = JSON.parse(body)
-    UVIndex = parsed_json['current_observation']['UV']
-    // Figure out the risk and recommendation
-    // switch case
-    console.log("the uvIndex is" + UVIndex)
+  var url = 'http://api.wunderground.com/api/e5d404218521ff0d/conditions/q/' + req.body.zipcode + '.json';
+
+  var values = request.get(url, function(err,res,body) {
+
+    var parsed_json = JSON.parse(body);
+    UVIndex = parsed_json['current_observation']['UV'];
+
     if (UVIndex <= 2.9) {
       risk = "Low"
       recommendation = "Wear sunglasses on bright days; use sunscreen if there is snow on the ground, which reflects UV radiation, or if you have particularly fair skin."
@@ -44,9 +42,13 @@ var findUVIndex = function (req, response) {
     }
     //console.log(UVIndex, risk, recommendation)
     response.json({ uvIndex: UVIndex, risk: risk, recommendation: recommendation })
-  });
+});
 
 }
 
 
-app.post('/', [findUVIndex])
+app.post('/findUVIndex', [findUVIndex]);
+
+app.listen(1337, function () {
+  console.log('app listening on port 1337!')
+})
