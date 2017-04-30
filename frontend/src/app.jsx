@@ -305,25 +305,33 @@ export default class App extends React.Component {
             <tr>
               <td style={styles.td}>
                 <Paper style={styles.paper}>
-
+                  
                   <div style={styles.pad1top}/>
-                  Date
+                  
+                  <table>
+                  <tbody>
+                  <tr>
+                  <td style={{paddingLeft: 70}}>
+                  <i>Date</i>
                   <DatePicker
                   hintText="What day are you going?"
                   value={this.state.date}
                   onChange={this.changeDate}
                   shouldDisableDate={this.disableDays}/>
+                  </td>
 
+                  <td style={{paddingLeft: 140}}>
+                  <i>Location</i><br/>
+                  <AddressAutoComplete updateAddress={this.updateAddress} setZipcode={this.setZipcode}/>
+                  </td>
+                  </tr>
 
-
-                  <br/><br/><br/>Location <br/>
-                  <AddressAutoComplete style={{width: 300}} updateAddress={this.updateAddress} setZipcode={this.setZipcode}/>
-
+                  </tbody>
+                  </table>
 
                   <br/><br/>
-                  <RaisedButton label="Submit" onTouchTap={this.handleSubmit} />
-                  <br/><br/>
-                  
+                  <RaisedButton label="Submit" onTouchTap={this.handleSubmit} fullWidth={true}/>
+                  <br/><br/><br/><br/><br/>
 
                   <iframe
                     style={styles.map}
@@ -332,7 +340,7 @@ export default class App extends React.Component {
                     : 
                     "https://www.google.com/maps/embed/v1/place?key=AIzaSyB2PN2DWBME3STMNFugV___yXb4q57pECg&q=" + this.state.address.replace(" ","+")}
                     >
-                  </iframe>
+                  </iframe><br/><br/><br/>
 
                 </Paper>
               </td>
