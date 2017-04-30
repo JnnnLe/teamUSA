@@ -127,7 +127,7 @@ export default class AddressAutocomplete extends Component {
         hintText={this.props.hintText}
         value={this.state.value}
         onChange={this._handleChange}
-        placeholder='Where are you going?'
+        placeholder='Where in the United States?'
       />
     )
   }
