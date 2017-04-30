@@ -83,30 +83,23 @@ export default class AddressAutocomplete extends Component {
           method: 'GET'
         })
         .then(response => response.json())
-        .then(responseJson => {console.log(responseJson);
-          return {lat:responseJson.results[0].geometry.location.lat,lng:responseJson.results[0].geometry.location.lng}})
+        .then(responseJson => {return {lat:responseJson.results[0].geometry.location.lat,lng:responseJson.results[0].geometry.location.lng};})
         .then(latLng => {
           geocoder.geocode({location: latLng}, function(results, status) {
-            console.log('results')
-            console.log(results)
             if (results[0]) {
               for (var i = 0; i < results[0].address_components.length; i++) {
                   var types = results[0].address_components[i].types;
-
                   for (var typeIdx = 0; typeIdx < types.length; typeIdx++) {
                       if (types[typeIdx] == 'postal_code') {
-                          //console.log(results[0].address_components[i].long_name);
-                          console.log(results[0].address_components[i].short_name);
                           zipcode = results[0].address_components[i].short_name;
                       }
                   }
-                  address += " " + zipcode
-                  input.value = address;
-                  console.log(address, zipcode)
-                  props.setZipcode(zipcode);
-                  props.updateAddress();
-                  props.onChange(selectedSuggest);  
               }
+              address += " " + zipcode
+              input.value = address;
+              console.log(address, zipcode)
+              props.setZipcode(zipcode);
+              props.updateAddress();
             } else {
                 console.log("No results found");
             }
@@ -118,7 +111,7 @@ export default class AddressAutocomplete extends Component {
         console.log(address, zipcode)
         this.props.setZipcode(zipcode);
         this.props.updateAddress();
-        this.props.onChange(selectedSuggest);  
+        // this.props.onChange(selectedSuggest);  
       }
       
     })
