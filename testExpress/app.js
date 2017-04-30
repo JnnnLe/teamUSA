@@ -4,9 +4,12 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 var request = require('request');
+var path = require('path');
 
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());;
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 // Add headers
 app.use(function (req, res, next) {

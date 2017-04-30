@@ -17,7 +17,7 @@ var warnings = {
     color: '#801fa3',
     title: 'Extreme Danger',
     burn: '10 min.',
-    advice: 'Seek shade, apply SPF 30 sunscreen every two hours; wear a hat, sunglasses, and protective clothing.'
+    advice: 'Seek shade, apply SPF 30 every two hours; wear a hat, sunglasses, and protective clothing.'
   },
   '8-10': {
     color: '#ce3300',
@@ -156,7 +156,7 @@ export default class App extends React.Component {
 
     document.body.style.backgroundColor = "#A3CCFF";
     // document.body.style.backgroundImage = 'url("https://i.ytimg.com/vi/0PPq6_51P7c/maxresdefault.jpg")';
-    document.body.style.backgroundImage = 'url("http://allswalls.com/images/ocean-sea-water-surf-nature-landscape-wallpaper-8.jpg")';
+    document.body.style.backgroundImage = 'url("http://eskipaper.com/images/water-background-35.jpg")';
     // document.body.style.backgroundRepeat = 'no-repeat';
     // document.body.style.backgroundSize = '2000px 1000px';
 
@@ -217,6 +217,7 @@ export default class App extends React.Component {
   handleSubmit(){
     var address = document.getElementById('addressAutocompleteField').value;
     this.setState({address});
+    console.log(this.state.zipcode);
 
     // var regex = /[0-9]+/ig;
     // var zipcode = '';
@@ -279,13 +280,17 @@ export default class App extends React.Component {
     this.setState({mouseOver: this.state.maxUVI});
   }
 
+  disableDays(date) {
+    return date.getTime() - new Date().getTime() > 1000*60*60*24*9 || date.getTime() < new Date().getTime();
+  }
+
   render() {
     return (
       <div>
 
         <AppBar
-          title={<strong style={styles.text}>Solar Scout</strong>}
-          iconElementLeft={<IconButton iconStyle={{width: 30, height: 30}} ><SunIcon color='yellow'/></IconButton>}
+          title={<img src="http://localhost:1337/logo.png"/>}
+          iconElementLeft={<span />}
           style={styles.appbar}
         />
 
@@ -300,7 +305,8 @@ export default class App extends React.Component {
                   <DatePicker
                   hintText="What day are you going?"
                   value={this.state.date}
-                  onChange={this.changeDate}/>
+                  onChange={this.changeDate}
+                  shouldDisableDate={this.disableDays}/>
 
 
 
@@ -328,7 +334,7 @@ export default class App extends React.Component {
               <td style={styles.td}>
                 <Paper style={styles.paper}>
                   <div style={styles.pad2top}/>
-                    
+                    <br/><br/>
                     <BarChart
                       data={this.formatData(this.state.serverResponse)}
                       height={450}
@@ -362,7 +368,7 @@ export default class App extends React.Component {
                       </div>
                     </div>
 
-                    <br/><br/><br/><br/><br/>
+                    <br/><br/><br/><br/>
                     <div>
                       <table>
                       <tbody>
