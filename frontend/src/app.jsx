@@ -12,6 +12,53 @@ import AddressAutoComplete from './AddressAutoComplete.jsx';
 
 import {BarChart} from 'react-easy-chart'
 
+var warnings = {
+  '11+': {
+    color: '#801fa3',
+    title: 'Extreme Danger',
+    burn: '10 min.',
+    advice: 'Seek shade, apply SPF 30 sunscreen every two hours; wear a hat, sunglasses, and protective clothing.'
+  },
+  '8-10': {
+    color: '#ce3300',
+    title: 'Very High Danger',
+    burn: '15-25 min.',
+    advice: 'Apply SPF 30 sunscreen; wear a hat, sunglasses, and protective clothing.'
+  },
+  '6-7': {
+    color: '#e8ae00',
+    title: 'High Danger',
+    burn: '30 min.',
+    advice: 'Apply SPF 15 to 30 sunscreen; wear a hat and sunglasses.'
+  },
+  '3-5': {
+    color: '#f9ef22',
+    title: 'Moderate Danger',
+    burn: '45 min.',
+    advice: 'Apply SPF 15 sunscreen; wear a hat.'
+  },
+  '0-2': {
+    color: '#007507',
+    title: 'Low Danger',
+    burn: '60 min.',
+    advice: 'Apply SPF 15 sunscreen; wear a hat.'
+  }
+}
+
+var uviMap = {
+  '0': '0-2',
+  '1': '0-2',
+  '2': '0-2',
+  '3': '3-5',
+  '4': '3-5',
+  '5': '3-5',
+  '6': '6-7',
+  '7': '6-7',
+  '8': '8-10',
+  '9': '8-10',
+  '10': '8-10',
+  '11': '11+'
+}
 
 var styles = {
   text: {
@@ -102,7 +149,9 @@ export default class App extends React.Component {
       serverResponse: {"response": []},
       zipcode: '94121',
       minTemp: -50,
-      maxTemp: 150
+      maxTemp: 150,
+      maxUVI: 0,
+      mouseOver: 0
     };
 
     document.body.style.backgroundColor = "#A3CCFF";
@@ -116,6 +165,8 @@ export default class App extends React.Component {
     this.changeDate = this.changeDate.bind(this);
     this.updateAddress = this.updateAddress.bind(this);
     this.setZipcode = this.setZipcode.bind(this);
+    this.mouseOverHandler = this.mouseOverHandler.bind(this);
+    this.mouseOutHandler = this.mouseOutHandler.bind(this);
   }
 
   componentDidMount() {
@@ -149,7 +200,7 @@ export default class App extends React.Component {
       }
 
       // data.push({x:hour, y:UVIndex, color});
-      data.push({x:hour, y:parseInt(serverResponse[i].temp), color});
+      data.push({x:hour, y:parseInt(serverResponse[i].temp), color, uvi:parseInt(serverResponse[i].UVIndex)});
     }
     return data;
   }
@@ -202,20 +253,30 @@ export default class App extends React.Component {
     .then(serverResponse => this.setState({serverResponse:serverResponse.response}))
     .then(() => {
       var minTemp = 200;
-      var maxTemp = -200;    
-      console.log(this.state.serverResponse)
+      var maxTemp = -200;
+      var maxUVI = 0;
       for (var i=0;i<this.state.serverResponse.length;i++) {
         var temp = parseInt(this.state.serverResponse[i].temp);
+        var UVI = parseInt(this.state.serverResponse[i].UVIndex);
         minTemp = temp < minTemp ? temp : minTemp;
         maxTemp = temp > maxTemp ? temp : maxTemp;
+        maxUVI = UVI > maxUVI ? UVI : maxUVI;
       }
-      this.setState({minTemp,maxTemp});  
+      this.setState({minTemp,maxTemp,maxUVI,mouseOver:maxUVI});
     })
 
   }
 
   changeDate(event,date) {
     this.setState({date})
+  }
+
+  mouseOverHandler(d,e) {
+    this.setState({mouseOver: d.uvi});
+  }
+
+  mouseOutHandler() {
+    this.setState({mouseOver: this.state.maxUVI});
   }
 
   render() {
@@ -272,9 +333,11 @@ export default class App extends React.Component {
                       data={this.formatData(this.state.serverResponse)}
                       height={450}
                       width={650}
+                      axes
                       axisLabels={{x: 'Time', y: 'Temp'}}
                       yDomainRange={[this.state.minTemp-10, this.state.maxTemp+10]}
-                      axes
+                      mouseOverHandler={this.mouseOverHandler}
+                      mouseOutHandler={this.mouseOutHandler}
                     />
 
                     <div>
@@ -299,7 +362,25 @@ export default class App extends React.Component {
                       </div>
                     </div>
 
-
+                    <br/><br/><br/><br/><br/>
+                    <div>
+                      <table>
+                      <tbody>
+                      <tr>
+                      <td id="purple" style={{backgroundColor: warnings[uviMap[this.state.mouseOver]].color, width: '40'}}></td>
+                      <td style={{width: '40'}}/>
+                      <td>
+                        <h2>{warnings[uviMap[this.state.mouseOver]].title}</h2>
+                        <p>
+                          <b>Time to burn: {warnings[uviMap[this.state.mouseOver]].burn}</b>
+                          <br/><br/>
+                          <i>{warnings[uviMap[this.state.mouseOver]].advice}</i>
+                        </p>
+                      </td>
+                      </tr>
+                      </tbody>
+                      </table>
+                    </div>
 
                   <div style={styles.pad2bot}/>
                 </Paper>
@@ -312,13 +393,3 @@ export default class App extends React.Component {
     )
   }
 }
-
-    // <div>
-    //   <td id="purple" class="uv-number" style="background-color: purple;"><span>UV 11+</span></td>
-    //   <td class="emoji"><img src="https://gallery.mailchimp.com/47ae7f0af141375f4a24dd7ad/images/bde79451-77c1-45c7-91d8-ef4f27896303.png" alt="" /></td><td class="info"><h2> Extreme Danger</h2>
-    //   <p>
-    //   <b>Time to burn: 10 min.</b>
-    //   <br/><br/>
-    //   <i>Seek shade, apply SPF 30 sunscreen every two hours; wear a hat, sunglasses, and protective clothing.</i>
-    //   </p>
-    // </div>
