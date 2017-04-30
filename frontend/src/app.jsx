@@ -104,7 +104,6 @@ var styles = {
     display: 'block',
     marginLeft: 15,
     marginRight: 15,
-    // backgroundColor: '#c6a567'
     backgroundImage: 'url("https://s-media-cache-ak0.pinimg.com/originals/0c/5c/b9/0c5cb9a74e9674d921b7be5621d3ad58.jpg")'
   },
   body: {
@@ -132,8 +131,6 @@ var styles = {
   appbar: {
     backgroundColor: '#c6a567',
     color: 'black',
-    // backgroundImage: 'url("https://i.ytimg.com/vi/0PPq6_51P7c/maxresdefault.jpg")'
-    // backgroundImage: 'url("http://gallery.yopriceville.com/var/albums/Backgrounds/Background_Beach_Sand.jpg?m=1432123262")'
     backgroundImage: 'url("http://d-beach.com/wp-content/uploads/2015/01/beach-healing.jpg")',
     backgroundSize: '2000px 200px'
 
@@ -162,9 +159,6 @@ export default class App extends React.Component {
 
     document.body.style.backgroundColor = "#012A52";
     document.body.style.backgroundImage = 'url("http://backgrounds.picaboo.com/download/e3/33/e33400a443094bdcb7c30c9e8990e12f/Beach%20Vacation%20Sand.jpg")';
-    // document.body.style.backgroundImage = 'url("http://eskipaper.com/images/water-background-35.jpg")';
-    // document.body.style.backgroundRepeat = 'no-repeat';
-    // document.body.style.backgroundSize = '2000px 1000px';
 
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -205,7 +199,6 @@ export default class App extends React.Component {
         color = "f9ef22";
       }
 
-      // data.push({x:hour, y:UVIndex, color});
       data.push({x:hour, y:parseInt(serverResponse[i].temp), color, uvi:parseInt(serverResponse[i].UVIndex)});
     }
     return data;
@@ -214,6 +207,7 @@ export default class App extends React.Component {
   updateAddress() {
     var address = document.getElementById('addressAutocompleteField').value;
     this.setState({address});
+    handleSubmit();
   }
 
   setZipcode(zipcode) {
@@ -224,26 +218,6 @@ export default class App extends React.Component {
     var address = document.getElementById('addressAutocompleteField').value;
     this.setState({address});
     console.log(this.state.zipcode);
-
-    // var regex = /[0-9]+/ig;
-    // var zipcode = '';
-    // var oldZipcode = '';
-    // while (true) {
-    //   oldZipcode = zipcode;
-    //   zipcode = regex.exec(address);
-    //   if (zipcode == null) {
-    //     zipcode = oldZipcode[0];
-    //     break;
-    //   }
-    // }
-
-    // if (this.state.zipcode.length == 0) {
-    //   fetch('http://maps.googleapis.com/maps/api/geocode/json?address=' + address.replace(" ","+") + '&sensor=true_or_false', {
-    //     method: 'GET'
-    //   })
-    //   .then(response => response.json())
-    //   .then(zipcode => this.setState({zipcode}))
-    // }
 
     fetch('http://localhost:1337/findUVIndex', {
       method: 'POST',
@@ -355,7 +329,7 @@ export default class App extends React.Component {
                       width={650}
                       axes
                       axisLabels={{x: 'Time', y: 'Temp'}}
-                      yDomainRange={[this.state.minTemp-10, this.state.maxTemp+10]}
+                      yDomainRange={[this.state.minTemp-10, this.state.maxTemp+5]}
                       mouseOverHandler={this.mouseOverHandler}
                       mouseOutHandler={this.mouseOutHandler}
                     />

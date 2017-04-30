@@ -96,6 +96,10 @@ var findUVIndex = function (req, response) {
 
 app.post('/findUVIndex', [findUVIndex]);
 
+app.get('/mapkey', function(req,res){
+  res.send(config.mapKey());
+});
+
 app.listen(1337, function () {
   console.log('app listening on port 1337!')
 })
