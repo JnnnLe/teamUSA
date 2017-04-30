@@ -34,12 +34,12 @@ var findRiskAndRecommendation = function(UVIndex) {
   if (UVIndex <= 2.9) {
     risk = "Low";
     recommendation = "Wear sunglasses on bright days; use sunscreen if there is snow on the ground, which reflects UV radiation, or if you have particularly fair skin."
-  } else if (UVIndex >=3 && UVIndex <= 5.9)  {
+  } else if (UVIndex >= 3 && UVIndex <= 5.9)  {
     risk  = "Moderate";
     recommendation = "Take precautions, such as covering up, if you will be outside. Stay in shade near midday when the sun is strongest."
-  } else if (UVIndex >=6 && UVIndex <= 7.9) {
+  } else if (UVIndex >= 6 && UVIndex <= 7.9) {
     risk = "Orange";
-    recommendation = "Cover the body with sun protective clothing, use SPF 30+ sunscreen, wear a hat, reduce time in the sun within three hours of solar noon, and wear sunglasses."
+    recommendation = "Cover the body with sun protective clothing, use SPF 30+ sunscreen, wear a hat, reduce time in the ssun within three hours of solar noon, and wear sunglasses."
   } else if (UVIndex >= 8 && UVIndex <= 10.9) {
     risk = "Red";
     recommendation = "Wear SPF 30+ sunscreen, a shirt, sunglasses, and a wide-brimmed hat. Do not stay in the sun for too long."
@@ -83,7 +83,7 @@ var findUVIndex = function (req, response) {
           { 'hour':  hourly_forecast[i]['FCTTIME']['hour'],
             'UVIndex' : hourly_forecast[i]['uvi'] ,
             'risk': values[0],
-            'recommendation': values[1]
+            'temp': hourly_forecast[i]['temp']['english']
           })
       }
     }
