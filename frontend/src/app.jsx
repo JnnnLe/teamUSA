@@ -81,7 +81,8 @@ export default class App extends React.Component {
         zipcode: state.zipcode,
         timestamp: state.date.getTime(),
       })
-    })
+    }).then(response => response.json())
+    .then(responseJson => console.log(responseJson));
   }
 
   changeDate(event,date) {
