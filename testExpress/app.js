@@ -4,6 +4,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 var request = require('request');
+var config = require('./config');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());;
@@ -61,7 +62,7 @@ var findUVIndex = function (req, response) {
   */
   var UVIndex;
   var risk;
-  var url = 'http://api.wunderground.com/api/e5d404218521ff0d/hourly10day/q/' + req.body.zipcode + '.json';
+  var url = 'http://api.wunderground.com/api/' + config.apiKey() + '/hourly10day/q/' + req.body.zipcode + '.json';
 
   // Process the epoch time sent to us and find the date
   var date = new Date(req.body.timestamp).getDate();
