@@ -13,18 +13,43 @@ import AddressAutoComplete from './AddressAutoComplete.jsx';
 
 var styles = {
   paper: {
-    // display: 'inline-block',
-    // marginLeft: 100,
-    // marginRight: 100,
-    height: 100,
     paddingLeft: 50,
     paddingRight: 50,
     paddingTop: 25,
     paddingBottom: 25,
+    display: 'block',
+    marginLeft: 15,
+    marginRight: 15
   },
   body: {
     marginTop: 100
   },
+  td: {
+    width: '49%',
+  },
+  pad1top: {
+    height: 50
+  },
+  pad1bot: {
+    height: 450
+  },
+  pad2top: {
+    height: 380
+  },
+  pad2bot: {
+    height: 380
+  },
+  table: {
+    marginTop: 20,
+    width: '100%'
+  },
+  appbar: {
+    backgroundImage: 'url("https://i.ytimg.com/vi/0PPq6_51P7c/maxresdefault.jpg")'
+  },
+  map: {
+    height: 450,
+    width: 800
+  }
 }
 
 export default class App extends React.Component {
@@ -36,8 +61,11 @@ export default class App extends React.Component {
       hour2: 14,
       searchText: '',
       date: {},
-      zipcode: 0
+      address: '',
+      serverResponse: {}
     };
+
+    document.body.style.backgroundColor = "#ddd";
 
     this.handleHour1Change = this.handleHour1Change.bind(this);
     this.onAutoCompleteInputChange = this.onAutoCompleteInputChange.bind(this);
@@ -46,21 +74,21 @@ export default class App extends React.Component {
     this.changeDate = this.changeDate.bind(this);
   }
 
-  handleHour1Change(event, index, value) {
+  handleHour1Change(event, index, hour1) {
     this.setState({
-      hour1: value
+      hour1
     });
   }
 
-  handleHour2Change(event, index, value) {
+  handleHour2Change(event, index, hour2) {
     this.setState({
-      hour2: value
+      hour2
     });
   }
 
-  onAutoCompleteInputChange(value) {
+  onAutoCompleteInputChange(searchText) {
     this.setState({
-      searchText: value
+      searchText
     });
   }
 
@@ -69,8 +97,21 @@ export default class App extends React.Component {
   }
 
   handleSubmit(state){
-    var zipcode = document.getElementById('addressAutocompleteField').value.split(" ")[3];
-    this.setState({zipcode:zipcode})
+    var address = document.getElementById('addressAutocompleteField').value;
+    this.setState({address});
+
+    var regex = /[0-9]+/ig;
+    var zipcode = '';
+    var oldZipcode = '';
+    while (true) {
+      oldZipcode = zipcode;
+      zipcode = regex.exec(address);
+      if (zipcode == null) {
+        zipcode = oldZipcode[0];
+        break;
+      }
+    } 
+    
     fetch('http://localhost:1337/findUVIndex', {
       method: 'POST',
       headers: {
@@ -78,15 +119,15 @@ export default class App extends React.Component {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        zipcode: state.zipcode,
-        timestamp: state.date.getTime(),
+        zipcode: zipcode,
+        timestamp: this.state.date.getTime(),
       })
     }).then(response => response.json())
     .then(responseJson => console.log(responseJson));
   }
 
   changeDate(event,date) {
-    this.setState({date:date})
+    this.setState({date})
   }
 
   render() {
@@ -94,70 +135,57 @@ export default class App extends React.Component {
       <div>
 
         <AppBar
-          title="UV Detector"
+          title="Solar Scout"
           iconElementLeft={<IconButton><SunIcon /></IconButton>}
+          style={styles.appbar}
         />
 
-        <div className="row" style={styles.body}>
+        <table style={styles.table}>
+          <tbody>
+            <tr>
+              <td style={styles.td}>
+                <Paper style={styles.paper}>
+
+                  <div style={styles.pad1top}/>
+                  Date
+                  <DatePicker
+                  hintText="What day are you going?"
+                  value={this.state.date}
+                  onChange={this.changeDate}/>
 
 
-            Date
-            <DatePicker
-            hintText="What day are you going?"
-            value={this.state.date}
-            onChange={this.changeDate}/>
+
+                  <br/><br/><br/>Location <br/>
+                  <AddressAutoComplete style={{width: 300}}/>
 
 
+                  <br/><br/>
+                  <RaisedButton label="Submit" onTouchTap={() => this.handleSubmit(this.state)} />
+                  <br/><br/>
+                  
 
-            Location <br/>
-            <AddressAutoComplete/>
+                  <iframe
+                    style={styles.map}
+                    src={this.state.address.length == 0 ? 
+                    "https://www.google.com/maps/embed/v1/place?key=AIzaSyB2PN2DWBME3STMNFugV___yXb4q57pECg&q=Berkeley+CA" 
+                    : 
+                    "https://www.google.com/maps/embed/v1/place?key=AIzaSyB2PN2DWBME3STMNFugV___yXb4q57pECg&q=" + this.state.address.replace(" ","+")}
+                    >
+                  </iframe>
 
+                </Paper>
+              </td>
 
+              <td style={styles.td}>
+                <Paper style={styles.paper}>
+                <div style={styles.pad2top}/>
+                <div style={styles.pad2bot}/>
+                </Paper>
+              </td>
+            </tr>
+          </tbody>
 
-            <br/>Time of day<br/>
-            <DropDownMenu value={this.state.hour1} onChange={this.handleHour1Change} style={styles.menu}>
-              <MenuItem value={5} primaryText="5am" />
-              <MenuItem value={6} primaryText="6am" />
-              <MenuItem value={7} primaryText="7am" />
-              <MenuItem value={8} primaryText="8am" />
-              <MenuItem value={9} primaryText="9am" />
-              <MenuItem value={10} primaryText="10am" />
-              <MenuItem value={11} primaryText="11am" />
-              <MenuItem value={12} primaryText="12pm" />
-              <MenuItem value={13} primaryText="1pm" />
-              <MenuItem value={14} primaryText="2pm" />
-              <MenuItem value={15} primaryText="3pm" />
-              <MenuItem value={16} primaryText="4pm" />
-              <MenuItem value={17} primaryText="5pm" />
-              <MenuItem value={18} primaryText="6pm" />
-              <MenuItem value={19} primaryText="7pm" />
-              <MenuItem value={20} primaryText="8pm" />
-              <MenuItem value={21} primaryText="9pm" />
-            </DropDownMenu>
-            until
-            <DropDownMenu value={this.state.hour2} onChange={this.handleHour2Change} style={styles.menu}>
-              <MenuItem value={5} primaryText="5am" />
-              <MenuItem value={6} primaryText="6am" />
-              <MenuItem value={7} primaryText="7am" />
-              <MenuItem value={8} primaryText="8am" />
-              <MenuItem value={9} primaryText="9am" />
-              <MenuItem value={10} primaryText="10am" />
-              <MenuItem value={11} primaryText="11am" />
-              <MenuItem value={12} primaryText="12pm" />
-              <MenuItem value={13} primaryText="1pm" />
-              <MenuItem value={14} primaryText="2pm" />
-              <MenuItem value={15} primaryText="3pm" />
-              <MenuItem value={16} primaryText="4pm" />
-              <MenuItem value={17} primaryText="5pm" />
-              <MenuItem value={18} primaryText="6pm" />
-              <MenuItem value={19} primaryText="7pm" />
-              <MenuItem value={20} primaryText="8pm" />
-              <MenuItem value={21} primaryText="9pm" />
-            </DropDownMenu>
-
-
-        </div>
-<RaisedButton label="Submimt" onTouchTap={() => this.handleSubmit(this.state)} />
+        </table>
       </div>
     )
   }
