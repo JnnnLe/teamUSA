@@ -10,6 +10,32 @@ import Paper from 'material-ui/Paper';
 import RaisedButton from 'material-ui/RaisedButton';
 import AddressAutoComplete from './AddressAutoComplete.jsx';
 
+var Chart = require('react-d3-core').Chart;
+var LineChart = require('react-d3-basic').LineChart;
+
+var width = 700,
+    height = 300,
+    margins = {left: 100, right: 100, top: 50, bottom: 50},
+    title = "UV Index per Hour",
+    // chart series,
+    // field: is what field your data want to be selected
+    // name: the name of the field that display in legend
+    // color: what color is the line
+    chartSeries = [
+      {
+        field: 'UV',
+        color: '#f4e242'
+      }
+    ],
+    // your x accessor
+    x = function(d) {
+      return d.hour;
+    },
+    xScale = 'ordinal',
+    xLabel = "Hour",
+    yLabel = "UV Index",
+    yTicks = [3];
+
 
 var styles = {
   paper: {
@@ -34,10 +60,10 @@ var styles = {
     height: 450
   },
   pad2top: {
-    height: 380
+    height: 10
   },
   pad2bot: {
-    height: 380
+    height: 420
   },
   table: {
     marginTop: 20,
@@ -57,43 +83,30 @@ export default class App extends React.Component {
   constructor() {
     super();
     this.state = {
-      hour1: 10,
-      hour2: 14,
-      searchText: '',
       date: {},
       address: '',
-      serverResponse: {}
+      serverResponse: {"response": []}
     };
 
     document.body.style.backgroundColor = "#ddd";
 
-    this.handleHour1Change = this.handleHour1Change.bind(this);
-    this.onAutoCompleteInputChange = this.onAutoCompleteInputChange.bind(this);
-    this.onClickLocation = this.onClickLocation.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.changeDate = this.changeDate.bind(this);
+    this.updateAddress = this.updateAddress.bind(this);
   }
 
-  handleHour1Change(event, index, hour1) {
-    this.setState({
-      hour1
-    });
+  formatData(serverResponse) {
+    var data = []
+    for (var i=0;i<serverResponse.length;i++) {
+      data.push({hour: serverResponse[i].hour, UV: serverResponse[i].UVIndex});
+    }
+    console.log(data);
+    return data;
   }
 
-  handleHour2Change(event, index, hour2) {
-    this.setState({
-      hour2
-    });
-  }
-
-  onAutoCompleteInputChange(searchText) {
-    this.setState({
-      searchText
-    });
-  }
-
-  onClickLocation(selectedData, searchedText, selectedDataIndex) {
-
+  updateAddress() {
+    var address = document.getElementById('addressAutocompleteField').value;
+    this.setState({address});
   }
 
   handleSubmit(state){
@@ -110,8 +123,8 @@ export default class App extends React.Component {
         zipcode = oldZipcode[0];
         break;
       }
-    } 
-    
+    }
+
     fetch('http://localhost:1337/findUVIndex', {
       method: 'POST',
       headers: {
@@ -122,8 +135,68 @@ export default class App extends React.Component {
         zipcode: zipcode,
         timestamp: this.state.date.getTime(),
       })
-    }).then(response => response.json())
-    .then(responseJson => console.log(responseJson));
+    })
+    .then(response => response.json())
+    // .then(serverResponse => this.setState({serverResponse}))
+    .then(responseJson => this.setState({serverResponse: {
+      "response": [
+        {
+          "hour": "2",
+          "UVIndex": "10",
+          "risk": "Violet",
+          "recommendation": "Take all precautions: Wear SPF 30+ sunscreen, a long-sleeved shirt and trousers, sunglasses, and a very broad hat. Avoid the sun within three hours of solar noon."
+        },
+        {
+          "hour": "3",
+          "UVIndex": "8",
+          "risk": "Violet",
+          "recommendation": "Take all precautions: Wear SPF 30+ sunscreen, a long-sleeved shirt and trousers, sunglasses, and a very broad hat. Avoid the sun within three hours of solar noon."
+        },
+        {
+          "hour": "4",
+          "UVIndex": "7",
+          "risk": "Violet",
+          "recommendation": "Take all precautions: Wear SPF 30+ sunscreen, a long-sleeved shirt and trousers, sunglasses, and a very broad hat. Avoid the sun within three hours of solar noon."
+        },
+        {
+          "hour": "5",
+          "UVIndex": "10",
+          "risk": "Violet",
+          "recommendation": "Take all precautions: Wear SPF 30+ sunscreen, a long-sleeved shirt and trousers, sunglasses, and a very broad hat. Avoid the sun within three hours of solar noon."
+        },
+        {
+          "hour": "6",
+          "UVIndex": "8",
+          "risk": "Violet",
+          "recommendation": "Take all precautions: Wear SPF 30+ sunscreen, a long-sleeved shirt and trousers, sunglasses, and a very broad hat. Avoid the sun within three hours of solar noon."
+        },
+        {
+          "hour": "7",
+          "UVIndex": "7",
+          "risk": "Violet",
+          "recommendation": "Take all precautions: Wear SPF 30+ sunscreen, a long-sleeved shirt and trousers, sunglasses, and a very broad hat. Avoid the sun within three hours of solar noon."
+        },
+        {
+          "hour": "8",
+          "UVIndex": "10",
+          "risk": "Violet",
+          "recommendation": "Take all precautions: Wear SPF 30+ sunscreen, a long-sleeved shirt and trousers, sunglasses, and a very broad hat. Avoid the sun within three hours of solar noon."
+        },
+        {
+          "hour": "9",
+          "UVIndex": "8",
+          "risk": "Violet",
+          "recommendation": "Take all precautions: Wear SPF 30+ sunscreen, a long-sleeved shirt and trousers, sunglasses, and a very broad hat. Avoid the sun within three hours of solar noon."
+        },
+        {
+          "hour": "10",
+          "UVIndex": "7",
+          "risk": "Violet",
+          "recommendation": "Take all precautions: Wear SPF 30+ sunscreen, a long-sleeved shirt and trousers, sunglasses, and a very broad hat. Avoid the sun within three hours of solar noon."
+        }
+      ]
+    }}))
+    console.log(this.state.serverResponse)
   }
 
   changeDate(event,date) {
@@ -156,7 +229,7 @@ export default class App extends React.Component {
 
 
                   <br/><br/><br/>Location <br/>
-                  <AddressAutoComplete style={{width: 300}}/>
+                  <AddressAutoComplete style={{width: 300}} updateAddress={this.updateAddress}/>
 
 
                   <br/><br/>
@@ -178,8 +251,21 @@ export default class App extends React.Component {
 
               <td style={styles.td}>
                 <Paper style={styles.paper}>
-                <div style={styles.pad2top}/>
-                <div style={styles.pad2bot}/>
+                  <div style={styles.pad2top}/>
+                    
+                    <LineChart  
+                      margins= {margins}
+                      title={title}
+                      data={this.formatData(this.state.serverResponse.response)}
+                      width={width}
+                      height={height}
+                      chartSeries={chartSeries}
+                      x={x}
+                      showXGrid={false}
+                      showYGrid={false}
+                      />
+
+                  <div style={styles.pad2bot}/>
                 </Paper>
               </td>
             </tr>
@@ -190,3 +276,7 @@ export default class App extends React.Component {
     )
   }
 }
+                      // xLabel= {xLabel}
+                      // xScale= {xScale}
+                      // yTicks= {yTicks}
+                      // yLabel = {yLabel}

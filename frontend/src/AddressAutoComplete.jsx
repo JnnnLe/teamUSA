@@ -6,7 +6,8 @@ export default class AddressAutocomplete extends Component {
     value: PropTypes.string,
     floatingLabelText: PropTypes.string,
     hintText: PropTypes.string,
-    onChange: PropTypes.func
+    onChange: PropTypes.func,
+    updateAddress: PropTypes.func
   }
 
   componentWillMount () {
@@ -67,6 +68,7 @@ export default class AddressAutocomplete extends Component {
       }
       address = address.substring(0,address.length - 2);
       input.value = address;
+      this.props.updateAddress();
       this.props.onChange(selectedSuggest)
     })
   }
