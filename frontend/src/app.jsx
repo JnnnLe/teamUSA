@@ -10,34 +10,40 @@ import Paper from 'material-ui/Paper';
 import RaisedButton from 'material-ui/RaisedButton';
 import AddressAutoComplete from './AddressAutoComplete.jsx';
 
-var Chart = require('react-d3-core').Chart;
-var LineChart = require('react-d3-basic').LineChart;
-
-var width = 700,
-    height = 300,
-    margins = {left: 100, right: 100, top: 50, bottom: 50},
-    title = "UV Index per Hour",
-    // chart series,
-    // field: is what field your data want to be selected
-    // name: the name of the field that display in legend
-    // color: what color is the line
-    chartSeries = [
-      {
-        field: 'UV',
-        color: '#f4e242'
-      }
-    ],
-    // your x accessor
-    x = function(d) {
-      return d.hour;
-    },
-    xScale = 'ordinal',
-    xLabel = "Hour",
-    yLabel = "UV Index",
-    yTicks = [3];
+import {BarChart} from 'react-easy-chart'
 
 
 var styles = {
+  legend: {
+    display: 'inline-block',
+    marginLeft: 40,
+    marginRight: 40
+  },
+  box: {
+    width: 7,
+    height: 7,
+    margin: 5,
+    border: '1px solid rgba(0, 0, 0, .2)',
+    display: 'inline-block'
+  },
+  green: {
+    backgroundColor: '#007507',
+  },
+  yellow: {
+    backgroundColor: '#f9ef22',
+  },
+  orange: {
+    backgroundColor: '#e8ae00',
+  },
+  red: {
+    backgroundColor: '#ce3300',
+  },
+  violet: {
+    backgroundColor: '#801fa3',
+  },
+  label: {
+    display: 'inline-block'
+  },
   paper: {
     paddingLeft: 50,
     paddingRight: 50,
@@ -63,10 +69,10 @@ var styles = {
     height: 10
   },
   pad2bot: {
-    height: 420
+    height: 20
   },
   table: {
-    marginTop: 20,
+    marginTop: 30,
     width: '100%'
   },
   appbar: {
@@ -83,9 +89,10 @@ export default class App extends React.Component {
   constructor() {
     super();
     this.state = {
-      date: {},
-      address: '',
-      serverResponse: {"response": []}
+      date: new Date(2017,4,1,10,0,0,0),
+      address: '28 Great Hwy, San Francisco, CA 94121',
+      serverResponse: {"response": []},
+      zipcode: '94121'
     };
 
     document.body.style.backgroundColor = "#ddd";
@@ -93,14 +100,42 @@ export default class App extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.changeDate = this.changeDate.bind(this);
     this.updateAddress = this.updateAddress.bind(this);
+    this.setZipcode = this.setZipcode.bind(this);
+  }
+
+  componentDidMount() {
+    document.getElementById('addressAutocompleteField').value = this.state.address;
+    this.handleSubmit();
   }
 
   formatData(serverResponse) {
     var data = []
     for (var i=0;i<serverResponse.length;i++) {
-      data.push({hour: serverResponse[i].hour, UV: serverResponse[i].UVIndex});
+      
+      var hour = parseInt(serverResponse[i].hour, 10) < 12 ? parseInt(serverResponse[i].hour, 10) + 'a' : (parseInt(serverResponse[i].hour, 10) - 12) + 'p';
+      if (hour == '0a') {
+        hour = '12a'
+      } else if (hour == '0p') {
+        hour = '12p'
+      }
+
+      var UVIndex = parseInt(serverResponse[i].UVIndex);
+      UVIndex = UVIndex == 0 ? .15 : UVIndex;
+      var color = "#007507";
+
+      if (UVIndex > 10) {
+        color = "#801fa3";
+      } else if (UVIndex > 7) {
+        color = "#ce3300";
+      } else if (UVIndex > 5) {
+        color = "#e8ae00";
+      } else if (UVIndex > 2) {
+        color = "f9ef22";
+      }
+
+      data.push({x:hour, y:UVIndex, color});
+      // data.push({x:i, y:parseInt(serverResponse[i].temperature), color});
     }
-    console.log(data);
     return data;
   }
 
@@ -109,21 +144,33 @@ export default class App extends React.Component {
     this.setState({address});
   }
 
-  handleSubmit(state){
+  setZipcode(zipcode) {
+    this.setState({zipcode});
+  }
+
+  handleSubmit(){
     var address = document.getElementById('addressAutocompleteField').value;
     this.setState({address});
 
-    var regex = /[0-9]+/ig;
-    var zipcode = '';
-    var oldZipcode = '';
-    while (true) {
-      oldZipcode = zipcode;
-      zipcode = regex.exec(address);
-      if (zipcode == null) {
-        zipcode = oldZipcode[0];
-        break;
-      }
-    }
+    // var regex = /[0-9]+/ig;
+    // var zipcode = '';
+    // var oldZipcode = '';
+    // while (true) {
+    //   oldZipcode = zipcode;
+    //   zipcode = regex.exec(address);
+    //   if (zipcode == null) {
+    //     zipcode = oldZipcode[0];
+    //     break;
+    //   }
+    // }
+
+    // if (this.state.zipcode.length == 0) {
+    //   fetch('http://maps.googleapis.com/maps/api/geocode/json?address=' + address.replace(" ","+") + '&sensor=true_or_false', {
+    //     method: 'GET'
+    //   })
+    //   .then(response => response.json())
+    //   .then(zipcode => this.setState({zipcode}))
+    // }
 
     fetch('http://localhost:1337/findUVIndex', {
       method: 'POST',
@@ -132,71 +179,13 @@ export default class App extends React.Component {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        zipcode: zipcode,
+        zipcode: this.state.zipcode,
         timestamp: this.state.date.getTime(),
       })
     })
     .then(response => response.json())
-    // .then(serverResponse => this.setState({serverResponse}))
-    .then(responseJson => this.setState({serverResponse: {
-      "response": [
-        {
-          "hour": "2",
-          "UVIndex": "10",
-          "risk": "Violet",
-          "recommendation": "Take all precautions: Wear SPF 30+ sunscreen, a long-sleeved shirt and trousers, sunglasses, and a very broad hat. Avoid the sun within three hours of solar noon."
-        },
-        {
-          "hour": "3",
-          "UVIndex": "8",
-          "risk": "Violet",
-          "recommendation": "Take all precautions: Wear SPF 30+ sunscreen, a long-sleeved shirt and trousers, sunglasses, and a very broad hat. Avoid the sun within three hours of solar noon."
-        },
-        {
-          "hour": "4",
-          "UVIndex": "7",
-          "risk": "Violet",
-          "recommendation": "Take all precautions: Wear SPF 30+ sunscreen, a long-sleeved shirt and trousers, sunglasses, and a very broad hat. Avoid the sun within three hours of solar noon."
-        },
-        {
-          "hour": "5",
-          "UVIndex": "10",
-          "risk": "Violet",
-          "recommendation": "Take all precautions: Wear SPF 30+ sunscreen, a long-sleeved shirt and trousers, sunglasses, and a very broad hat. Avoid the sun within three hours of solar noon."
-        },
-        {
-          "hour": "6",
-          "UVIndex": "8",
-          "risk": "Violet",
-          "recommendation": "Take all precautions: Wear SPF 30+ sunscreen, a long-sleeved shirt and trousers, sunglasses, and a very broad hat. Avoid the sun within three hours of solar noon."
-        },
-        {
-          "hour": "7",
-          "UVIndex": "7",
-          "risk": "Violet",
-          "recommendation": "Take all precautions: Wear SPF 30+ sunscreen, a long-sleeved shirt and trousers, sunglasses, and a very broad hat. Avoid the sun within three hours of solar noon."
-        },
-        {
-          "hour": "8",
-          "UVIndex": "10",
-          "risk": "Violet",
-          "recommendation": "Take all precautions: Wear SPF 30+ sunscreen, a long-sleeved shirt and trousers, sunglasses, and a very broad hat. Avoid the sun within three hours of solar noon."
-        },
-        {
-          "hour": "9",
-          "UVIndex": "8",
-          "risk": "Violet",
-          "recommendation": "Take all precautions: Wear SPF 30+ sunscreen, a long-sleeved shirt and trousers, sunglasses, and a very broad hat. Avoid the sun within three hours of solar noon."
-        },
-        {
-          "hour": "10",
-          "UVIndex": "7",
-          "risk": "Violet",
-          "recommendation": "Take all precautions: Wear SPF 30+ sunscreen, a long-sleeved shirt and trousers, sunglasses, and a very broad hat. Avoid the sun within three hours of solar noon."
-        }
-      ]
-    }}))
-    console.log(this.state.serverResponse)
+    .then(serverResponse => this.setState({serverResponse:serverResponse.response}))
+    console.log(this.state.serverResponse);
   }
 
   changeDate(event,date) {
@@ -229,11 +218,11 @@ export default class App extends React.Component {
 
 
                   <br/><br/><br/>Location <br/>
-                  <AddressAutoComplete style={{width: 300}} updateAddress={this.updateAddress}/>
+                  <AddressAutoComplete style={{width: 300}} updateAddress={this.updateAddress} setZipcode={this.setZipcode}/>
 
 
                   <br/><br/>
-                  <RaisedButton label="Submit" onTouchTap={() => this.handleSubmit(this.state)} />
+                  <RaisedButton label="Submit" onTouchTap={this.handleSubmit} />
                   <br/><br/>
                   
 
@@ -253,17 +242,35 @@ export default class App extends React.Component {
                 <Paper style={styles.paper}>
                   <div style={styles.pad2top}/>
                     
-                    <LineChart  
-                      margins= {margins}
-                      title={title}
-                      data={this.formatData(this.state.serverResponse.response)}
-                      width={width}
-                      height={height}
-                      chartSeries={chartSeries}
-                      x={x}
-                      showXGrid={false}
-                      showYGrid={false}
-                      />
+                    <BarChart
+                      data={this.formatData(this.state.serverResponse)}
+                      height={450}
+                      width={650}
+                      axisLabels={{x: 'Time', y: 'Temp'}}
+                      axes
+                    />
+
+                    <div>
+                      <div style={styles.legend}>
+                      <div style={Object.assign({},styles.box,styles.green)}></div><div style={styles.label}>0-2</div>
+                      </div>
+
+                      <div style={styles.legend}>
+                      <div style={Object.assign({},styles.box,styles.yellow)}></div><div style={styles.label}>3-5</div>
+                      </div>
+                      
+                      <div style={styles.legend}>
+                      <div style={Object.assign({},styles.box,styles.orange)}></div><div style={styles.label}>6-7</div>
+                      </div>
+                      
+                      <div style={styles.legend}>
+                      <div style={Object.assign({},styles.box,styles.red)}></div><div style={styles.label}>8-10</div>
+                      </div>
+
+                      <div style={styles.legend}>
+                      <div style={Object.assign({},styles.box,styles.violet)}></div><div style={styles.label}>11+</div>
+                      </div>
+                    </div>
 
                   <div style={styles.pad2bot}/>
                 </Paper>
@@ -276,7 +283,3 @@ export default class App extends React.Component {
     )
   }
 }
-                      // xLabel= {xLabel}
-                      // xScale= {xScale}
-                      // yTicks= {yTicks}
-                      // yLabel = {yLabel}
