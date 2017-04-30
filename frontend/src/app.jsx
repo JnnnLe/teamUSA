@@ -126,7 +126,7 @@ var styles = {
   },
   table: {
     marginTop: 30,
-    width: '100%'
+    width: '100%',
   },
   appbar: {
     backgroundColor: '#c6a567',
@@ -137,7 +137,7 @@ var styles = {
 
   },
   map: {
-    height: 450,
+    height: 500,
     width: 800
   }
 }
@@ -205,9 +205,7 @@ export default class App extends React.Component {
   }
 
   updateAddress() {
-    var address = document.getElementById('addressAutocompleteField').value;
-    this.setState({address});
-    handleSubmit();
+    this.handleSubmit();
   }
 
   setZipcode(zipcode) {
@@ -217,7 +215,6 @@ export default class App extends React.Component {
   handleSubmit(){
     var address = document.getElementById('addressAutocompleteField').value;
     this.setState({address});
-    console.log(this.state.zipcode);
 
     fetch('http://localhost:1337/findUVIndex', {
       method: 'POST',
@@ -249,7 +246,9 @@ export default class App extends React.Component {
   }
 
   changeDate(event,date) {
-    this.setState({date})
+    this.setState({date}, () => {
+      this.handleSubmit()
+    })
   }
 
   mouseOverHandler(d,e) {
@@ -261,7 +260,7 @@ export default class App extends React.Component {
   }
 
   disableDays(date) {
-    return date.getTime() - new Date().getTime() > 1000*60*60*24*9 || date.getTime() < new Date().getTime();
+    return date.getTime() - new Date().getTime() > 1000*60*60*24*9 || date.getTime() < new Date().getTime() - 1000*60*60*24*1;
   }
 
   render() {
@@ -282,7 +281,7 @@ export default class App extends React.Component {
                   
                   <div style={styles.pad1top}/>
                   
-                  <table>
+                  <table style={{display: 'block'}}>
                   <tbody>
                   <tr>
                   <td style={{paddingLeft: 70}}>
@@ -304,8 +303,8 @@ export default class App extends React.Component {
                   </table>
 
                   <br/><br/>
-                  <RaisedButton label="Submit" onTouchTap={this.handleSubmit} fullWidth={true}/>
-                  <br/><br/><br/><br/><br/>
+                  
+                  <br/><br/><br/>
 
                   <iframe
                     style={styles.map}
@@ -322,7 +321,7 @@ export default class App extends React.Component {
               <td style={styles.td}>
                 <Paper style={styles.paper}>
                   <div style={styles.pad2top}/>
-                    <br/><br/>
+                    <span style={{display: 'block', textAlign: 'center'}}>{this.state.address}</span><br/>
                     <BarChart
                       data={this.formatData(this.state.serverResponse)}
                       height={450}

@@ -16,6 +16,8 @@ export default class AddressAutocomplete extends Component {
   }
 
   componentDidMount () {
+    var props = this.props;
+
     const input = document.getElementById('addressAutocompleteField')
     const options = {
       // componentRestrictions: {country: 'fr'},
@@ -35,9 +37,10 @@ export default class AddressAutocomplete extends Component {
       // Get each component of the address from the place details
       // and fill the corresponding field on the form.
       let selectedSuggest = {}
+      var zipcode = '';
       for (let addressComponent of selectedPlace.address_components) {
         if (addressComponent.types[0] == 'postal_code') {
-          this.props.setZipcode(addressComponent.short_name);
+          zipcode = addressComponent.short_name;
           console.log(addressComponent.short_name);
         }
         const addressType = addressComponent.types[0]
@@ -45,6 +48,7 @@ export default class AddressAutocomplete extends Component {
           selectedSuggest[addressType] = addressComponent[componentForm[addressType]]
         }
       }
+
       // input.value = selectedPlace.name // Code injection risk (check doc)
       var address = '';
       if (selectedSuggest.street_number != undefined) {
@@ -72,9 +76,51 @@ export default class AddressAutocomplete extends Component {
         address += ', ';
       }
       address = address.substring(0,address.length - 2);
-      input.value = address;
-      this.props.updateAddress();
-      this.props.onChange(selectedSuggest)
+
+      if (zipcode == '') {
+        var geocoder = new window.google.maps.Geocoder;
+        fetch('http://maps.googleapis.com/maps/api/geocode/json?address=' + address.replace(" ","+") + '&sensor=true_or_false', {
+          method: 'GET'
+        })
+        .then(response => response.json())
+        .then(responseJson => {console.log(responseJson);
+          return {lat:responseJson.results[0].geometry.location.lat,lng:responseJson.results[0].geometry.location.lng}})
+        .then(latLng => {
+          geocoder.geocode({location: latLng}, function(results, status) {
+            console.log('results')
+            console.log(results)
+            if (results[0]) {
+              for (var i = 0; i < results[0].address_components.length; i++) {
+                  var types = results[0].address_components[i].types;
+
+                  for (var typeIdx = 0; typeIdx < types.length; typeIdx++) {
+                      if (types[typeIdx] == 'postal_code') {
+                          //console.log(results[0].address_components[i].long_name);
+                          console.log(results[0].address_components[i].short_name);
+                          zipcode = results[0].address_components[i].short_name;
+                      }
+                  }
+                  address += " " + zipcode
+                  input.value = address;
+                  console.log(address, zipcode)
+                  props.setZipcode(zipcode);
+                  props.updateAddress();
+                  props.onChange(selectedSuggest);  
+              }
+            } else {
+                console.log("No results found");
+            }
+          });
+
+        })
+      } else {
+        input.value = address;
+        console.log(address, zipcode)
+        this.props.setZipcode(zipcode);
+        this.props.updateAddress();
+        this.props.onChange(selectedSuggest);  
+      }
+      
     })
   }
 

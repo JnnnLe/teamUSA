@@ -14,6 +14,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Add headers
 app.use(function (req, res, next) {
+    console.log('received req')
 
     // Website you wish to allow to connect
     res.setHeader('Access-Control-Allow-Origin', '*');
