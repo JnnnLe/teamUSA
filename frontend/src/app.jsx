@@ -14,10 +14,15 @@ import {BarChart} from 'react-easy-chart'
 
 
 var styles = {
+  text: {
+    color: 'yellow',
+    fontSize: 40,
+    textShadow: '1px 0 0 #000, 0 -1px 0 #000, 0 1px 0 #000, -1px 0 0 #000'
+  },
   legend: {
     display: 'inline-block',
-    marginLeft: 40,
-    marginRight: 40
+    marginLeft: 30,
+    marginRight: 30
   },
   box: {
     width: 7,
@@ -76,7 +81,10 @@ var styles = {
     width: '100%'
   },
   appbar: {
-    backgroundImage: 'url("https://i.ytimg.com/vi/0PPq6_51P7c/maxresdefault.jpg")'
+    backgroundColor: '#FAF2C7',
+    color: 'black',
+    // backgroundImage: 'url("https://i.ytimg.com/vi/0PPq6_51P7c/maxresdefault.jpg")'
+    backgroundImage: 'url("http://gallery.yopriceville.com/var/albums/Backgrounds/Background_Beach_Sand.jpg?m=1432123262")'
   },
   map: {
     height: 450,
@@ -92,10 +100,17 @@ export default class App extends React.Component {
       date: new Date(2017,4,1,10,0,0,0),
       address: '28 Great Hwy, San Francisco, CA 94121',
       serverResponse: {"response": []},
-      zipcode: '94121'
+      zipcode: '94121',
+      minTemp: -50,
+      maxTemp: 150
     };
 
-    document.body.style.backgroundColor = "#ddd";
+    document.body.style.backgroundColor = "#A3CCFF";
+    // document.body.style.backgroundImage = 'url("https://i.ytimg.com/vi/0PPq6_51P7c/maxresdefault.jpg")';
+    document.body.style.backgroundImage = 'url("http://allswalls.com/images/ocean-sea-water-surf-nature-landscape-wallpaper-8.jpg")';
+    // document.body.style.backgroundRepeat = 'no-repeat';
+    // document.body.style.backgroundSize = '2000px 1000px';
+
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.changeDate = this.changeDate.bind(this);
@@ -133,8 +148,8 @@ export default class App extends React.Component {
         color = "f9ef22";
       }
 
-      data.push({x:hour, y:UVIndex, color});
-      // data.push({x:i, y:parseInt(serverResponse[i].temperature), color});
+      // data.push({x:hour, y:UVIndex, color});
+      data.push({x:hour, y:parseInt(serverResponse[i].temp), color});
     }
     return data;
   }
@@ -185,7 +200,18 @@ export default class App extends React.Component {
     })
     .then(response => response.json())
     .then(serverResponse => this.setState({serverResponse:serverResponse.response}))
-    console.log(this.state.serverResponse);
+    .then(() => {
+      var minTemp = 200;
+      var maxTemp = -200;    
+      console.log(this.state.serverResponse)
+      for (var i=0;i<this.state.serverResponse.length;i++) {
+        var temp = parseInt(this.state.serverResponse[i].temp);
+        minTemp = temp < minTemp ? temp : minTemp;
+        maxTemp = temp > maxTemp ? temp : maxTemp;
+      }
+      this.setState({minTemp,maxTemp});  
+    })
+
   }
 
   changeDate(event,date) {
@@ -197,8 +223,8 @@ export default class App extends React.Component {
       <div>
 
         <AppBar
-          title="Solar Scout"
-          iconElementLeft={<IconButton><SunIcon /></IconButton>}
+          title={<strong style={styles.text}>Solar Scout</strong>}
+          iconElementLeft={<IconButton iconStyle={{width: 30, height: 30}} ><SunIcon color='yellow'/></IconButton>}
           style={styles.appbar}
         />
 
@@ -247,30 +273,33 @@ export default class App extends React.Component {
                       height={450}
                       width={650}
                       axisLabels={{x: 'Time', y: 'Temp'}}
+                      yDomainRange={[this.state.minTemp-10, this.state.maxTemp+10]}
                       axes
                     />
 
                     <div>
                       <div style={styles.legend}>
-                      <div style={Object.assign({},styles.box,styles.green)}></div><div style={styles.label}>0-2</div>
+                      <div style={Object.assign({},styles.box,styles.green)}></div><div style={styles.label}>0-2 UVI</div>
                       </div>
 
                       <div style={styles.legend}>
-                      <div style={Object.assign({},styles.box,styles.yellow)}></div><div style={styles.label}>3-5</div>
+                      <div style={Object.assign({},styles.box,styles.yellow)}></div><div style={styles.label}>3-5 UVI</div>
                       </div>
                       
                       <div style={styles.legend}>
-                      <div style={Object.assign({},styles.box,styles.orange)}></div><div style={styles.label}>6-7</div>
+                      <div style={Object.assign({},styles.box,styles.orange)}></div><div style={styles.label}>6-7 UVI</div>
                       </div>
                       
                       <div style={styles.legend}>
-                      <div style={Object.assign({},styles.box,styles.red)}></div><div style={styles.label}>8-10</div>
+                      <div style={Object.assign({},styles.box,styles.red)}></div><div style={styles.label}>8-10 UVI</div>
                       </div>
 
                       <div style={styles.legend}>
-                      <div style={Object.assign({},styles.box,styles.violet)}></div><div style={styles.label}>11+</div>
+                      <div style={Object.assign({},styles.box,styles.violet)}></div><div style={styles.label}>11+ UVI</div>
                       </div>
                     </div>
+
+
 
                   <div style={styles.pad2bot}/>
                 </Paper>
@@ -283,3 +312,13 @@ export default class App extends React.Component {
     )
   }
 }
+
+    // <div>
+    //   <td id="purple" class="uv-number" style="background-color: purple;"><span>UV 11+</span></td>
+    //   <td class="emoji"><img src="https://gallery.mailchimp.com/47ae7f0af141375f4a24dd7ad/images/bde79451-77c1-45c7-91d8-ef4f27896303.png" alt="" /></td><td class="info"><h2> Extreme Danger</h2>
+    //   <p>
+    //   <b>Time to burn: 10 min.</b>
+    //   <br/><br/>
+    //   <i>Seek shade, apply SPF 30 sunscreen every two hours; wear a hat, sunglasses, and protective clothing.</i>
+    //   </p>
+    // </div>
