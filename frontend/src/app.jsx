@@ -7,7 +7,7 @@ import MenuItem from 'material-ui/MenuItem';
 import IconButton from 'material-ui/IconButton';
 import SunIcon from 'material-ui/svg-icons/image/wb-sunny';
 import Paper from 'material-ui/Paper';
-
+import RaisedButton from 'material-ui/RaisedButton';
 import AddressAutoComplete from './AddressAutoComplete.jsx';
 
 
@@ -34,12 +34,16 @@ export default class App extends React.Component {
     this.state = {
       hour1: 10,
       hour2: 14,
-      searchText: ''
+      searchText: '',
+      date: {},
+      zipcode: 0
     };
 
     this.handleHour1Change = this.handleHour1Change.bind(this);
     this.onAutoCompleteInputChange = this.onAutoCompleteInputChange.bind(this);
     this.onClickLocation = this.onClickLocation.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.changeDate = this.changeDate.bind(this);
   }
 
   handleHour1Change(event, index, value) {
@@ -64,6 +68,26 @@ export default class App extends React.Component {
 
   }
 
+  handleSubmit(state){
+    var zipcode = document.getElementById('addressAutocompleteField').value.split(" ")[3];
+    this.setState({zipcode:zipcode})
+    fetch('localhost:1337/findUVIndex', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        zipcode: state.zipcode,
+        timestamp: state.date.getTime(),
+      })
+    })
+  }
+
+  changeDate(event,date) {
+    this.setState({date:date})
+  }
+
   render() {
     return (
       <div>
@@ -77,7 +101,10 @@ export default class App extends React.Component {
 
           
             Date
-            <DatePicker hintText="What day are you going?"/>
+            <DatePicker 
+            hintText="What day are you going?"
+            value={this.state.date}
+            onChange={this.changeDate}/>
           
 
           
@@ -129,7 +156,7 @@ export default class App extends React.Component {
           
 
         </div>
-
+<RaisedButton label="Submimt" onTouchTap={() => this.handleSubmit(this.state)} />
       </div>
     )
   }
