@@ -103,7 +103,9 @@ var styles = {
     paddingBottom: 25,
     display: 'block',
     marginLeft: 15,
-    marginRight: 15
+    marginRight: 15,
+    // backgroundColor: '#c6a567'
+    backgroundImage: 'url("https://s-media-cache-ak0.pinimg.com/originals/0c/5c/b9/0c5cb9a74e9674d921b7be5621d3ad58.jpg")'
   },
   body: {
     marginTop: 100
@@ -128,10 +130,14 @@ var styles = {
     width: '100%'
   },
   appbar: {
-    backgroundColor: '#FAF2C7',
+    backgroundColor: '#c6a567',
     color: 'black',
     // backgroundImage: 'url("https://i.ytimg.com/vi/0PPq6_51P7c/maxresdefault.jpg")'
-    backgroundImage: 'url("http://gallery.yopriceville.com/var/albums/Backgrounds/Background_Beach_Sand.jpg?m=1432123262")'
+    // backgroundImage: 'url("http://gallery.yopriceville.com/var/albums/Backgrounds/Background_Beach_Sand.jpg?m=1432123262")'
+    backgroundImage: 'url("http://d-beach.com/wp-content/uploads/2015/01/beach-healing.jpg")',
+    backgroundSize: '2000px 200px'
+
+
   },
   map: {
     height: 450,
@@ -154,9 +160,9 @@ export default class App extends React.Component {
       mouseOver: 0
     };
 
-    document.body.style.backgroundColor = "#A3CCFF";
-    // document.body.style.backgroundImage = 'url("https://i.ytimg.com/vi/0PPq6_51P7c/maxresdefault.jpg")';
-    document.body.style.backgroundImage = 'url("http://eskipaper.com/images/water-background-35.jpg")';
+    document.body.style.backgroundColor = "#012A52";
+    document.body.style.backgroundImage = 'url("http://backgrounds.picaboo.com/download/e3/33/e33400a443094bdcb7c30c9e8990e12f/Beach%20Vacation%20Sand.jpg")';
+    // document.body.style.backgroundImage = 'url("http://eskipaper.com/images/water-background-35.jpg")';
     // document.body.style.backgroundRepeat = 'no-repeat';
     // document.body.style.backgroundSize = '2000px 1000px';
 
