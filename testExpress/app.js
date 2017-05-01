@@ -1,5 +1,3 @@
-//TODO: .gitignore API + modularize url
-
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
@@ -13,8 +11,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 // Add headers
-app.use(function (req, res, next) {
-    console.log('received req')
+app.use(function(req, res, next) {
 
     // Website you wish to allow to connect
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -34,6 +31,7 @@ app.use(function (req, res, next) {
 });
 
 var findRiskAndRecommendation = function(UVIndex) {
+
   var risk = null;
   var recommendation = null;
   if (UVIndex <= 2.9) {
@@ -56,7 +54,7 @@ var findRiskAndRecommendation = function(UVIndex) {
 };
 
 
-var findUVIndex = function (req, response) {
+var findUVIndex = function(req, response) {
 
   // Work here to send the api call to the weather ground
   // process the result of it and send back to the FE
@@ -71,7 +69,7 @@ var findUVIndex = function (req, response) {
   // Process the epoch time sent to us and find the date
   var date = new Date(req.body.timestamp).getDate();
 
-  var values = request.get(url, function(err,res,body) {
+  var values = request.get(url, function(err, res, body) {
 
     var parsed_json = JSON.parse(body);
     // this gonna return back a hell out of objects. It's an array
