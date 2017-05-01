@@ -1,39 +1,30 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var app = express();
-var request = require('request');
-var path = require('path');
-var config = require('./config');
+const express = require('express');
+const bodyParser = require('body-parser');
+const app = express();
+const request = require('request');
+const path = require('path');
+const config = require('./config');
 
+// Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
 // Add headers
-app.use(function(req, res, next) {
-
-    // Website you wish to allow to connect
+app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-
-    // Request methods you wish to allow
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-
-    // Request headers you wish to allow
     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-
-    // Set to true if you need the website to include cookies in the requests sent
-    // to the API (e.g. in case you use sessions)
     res.setHeader('Access-Control-Allow-Credentials', true);
-
     // Pass to next layer of middleware
     next();
 });
 
-var findRiskAndRecommendation = function(UVIndex) {
+const findRiskAndRecommendation = (UVIndex) => {
 
-  var risk = null;
-  var recommendation = null;
+  let risk = null;
+  let recommendation = null;
   if (UVIndex <= 2.9) {
     risk = "Green";
     recommendation = "Wear sunglasses on bright days; use sunscreen if there is snow on the ground, which reflects UV radiation, or if you have particularly fair skin."
@@ -50,34 +41,31 @@ var findRiskAndRecommendation = function(UVIndex) {
     risk = "Violet";
     recommendation = "Take all precautions: Wear SPF 30+ sunscreen, a long-sleeved shirt and trousers, sunglasses, and a very broad hat. Avoid the sun within three hours of solar noon."
   }
-  return [risk, recommendation]
+  return [risk, recommendation];
 };
 
 
-var findUVIndex = function(req, response) {
+const findUVIndex = (req, response) => {
 
-  // Work here to send the api call to the weather ground
+  // Send the api call to the weather ground
   // process the result of it and send back to the FE
 
-  /*
-  * Step1: Get the request and process it
-  */
-  var UVIndex;
-  var risk;
-  var url = 'http://api.wunderground.com/api/' + config.apiKey() + '/hourly10day/q/' + req.body.zipcode + '.json';
+  // Step1: Get the request and process it
+  let UVIndex;
+  let risk;
+  let url = 'http://api.wunderground.com/api/' + config.apiKey() + '/hourly10day/q/' + req.body.zipcode + '.json';
 
   // Process the epoch time sent to us and find the date
-  var date = new Date(req.body.timestamp).getDate();
+  let date = new Date(req.body.timestamp).getDate();
+  let values = request.get(url, (err, res, body) => {
 
-  var values = request.get(url, function(err, res, body) {
+    let Fcttime = [];
+    let parsed_json = JSON.parse(body);
+    
+    // Returns  a lot of objects in an array
+    let hourly_forecast = parsed_json['hourly_forecast'];
 
-    var parsed_json = JSON.parse(body);
-    // this gonna return back a hell out of objects. It's an array
-    var hourly_forecast = parsed_json['hourly_forecast'];
-
-    var Fcttime = [];
-
-    for (var i = 0; i < hourly_forecast.length; i++) {
+    for (let i = 0; i < hourly_forecast.length; i++) {
       // check the date
       if (date == hourly_forecast[i]['FCTTIME']['mday']) {
         values = findRiskAndRecommendation(hourly_forecast['uvi'])
@@ -86,19 +74,20 @@ var findUVIndex = function(req, response) {
             'UVIndex' : hourly_forecast[i]['uvi'],
             'risk': values[0],
             'temp': hourly_forecast[i]['temp']['english']
-          })
+          });
       }
     }
+
     response.json({ response : Fcttime })
   });
 }
 
 app.post('/findUVIndex', [findUVIndex]);
 
-app.get('/mapkey', function(req,res){
+app.get('/mapkey', (req,res) => {
   res.send(config.mapKey());
 });
 
-app.listen(1337, function () {
+app.listen(1337, () => {
   console.log('app listening on port 1337!')
-})
+});
