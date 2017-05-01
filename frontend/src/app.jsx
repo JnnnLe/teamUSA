@@ -8,6 +8,8 @@ import IconButton from 'material-ui/IconButton';
 import SunIcon from 'material-ui/svg-icons/image/wb-sunny';
 import Paper from 'material-ui/Paper';
 import RaisedButton from 'material-ui/RaisedButton';
+import CircularProgress from 'material-ui/CircularProgress';
+
 import AddressAutoComplete from './AddressAutoComplete.jsx';
 
 import {BarChart} from 'react-easy-chart'
@@ -113,7 +115,7 @@ var styles = {
     width: '49%',
   },
   pad1top: {
-    height: 50
+    height: 55
   },
   pad1bot: {
     height: 450
@@ -154,7 +156,9 @@ export default class App extends React.Component {
       minTemp: -50,
       maxTemp: 150,
       maxUVI: 0,
-      mouseOver: 0
+      mouseOver: 0,
+      isLoading: false,
+      err: ''
     };
 
     document.body.style.backgroundColor = "#012A52";
@@ -216,6 +220,8 @@ export default class App extends React.Component {
     var address = document.getElementById('addressAutocompleteField').value;
     this.setState({address});
 
+    this.setState({isLoading: true})
+
     fetch('http://localhost:1337/findUVIndex', {
       method: 'POST',
       headers: {
@@ -230,6 +236,8 @@ export default class App extends React.Component {
     .then(response => response.json())
     .then(serverResponse => this.setState({serverResponse:serverResponse.response}))
     .then(() => {
+      this.setState({isLoading: false})
+      this.setState({err: ''})
       var minTemp = 200;
       var maxTemp = -200;
       var maxUVI = 0;
@@ -242,6 +250,11 @@ export default class App extends React.Component {
       }
       this.setState({minTemp,maxTemp,maxUVI,mouseOver:maxUVI});
     })
+    .catch(() => {
+        this.setState({isLoading: false})
+        this.setState({err: 'Not a valid address'})
+      }
+    );
 
   }
 
@@ -266,6 +279,9 @@ export default class App extends React.Component {
   render() {
     return (
       <div>
+
+        <CircularProgress style={{position: 'absolute',left:452,top:270, visibility: this.state.isLoading ? 'visible' : 'hidden'}} size={50}/>
+
 
         <AppBar
           title={<img src="http://localhost:1337/logo.png"/>}
@@ -321,13 +337,14 @@ export default class App extends React.Component {
               <td style={styles.td}>
                 <Paper style={styles.paper}>
                   <div style={styles.pad2top}/>
-                    <span style={{display: 'block', textAlign: 'center'}}>{this.state.address}</span><br/>
+                    <span style={{display: 'block', textAlign: 'center'}}>{this.state.err ? this.state.err : this.state.address}</span><br/>
+                    Temperature
                     <BarChart
                       data={this.formatData(this.state.serverResponse)}
                       height={450}
                       width={650}
                       axes
-                      axisLabels={{x: 'Time', y: 'Temp'}}
+                      axisLabels={{x: 'Time', y: ''}}
                       yDomainRange={[this.state.minTemp-10, this.state.maxTemp+5]}
                       mouseOverHandler={this.mouseOverHandler}
                       mouseOutHandler={this.mouseOutHandler}
@@ -355,7 +372,7 @@ export default class App extends React.Component {
                       </div>
                     </div>
 
-                    <br/><br/><br/><br/>
+                    <br/><br/><br/>
                     <div>
                       <table>
                       <tbody>
